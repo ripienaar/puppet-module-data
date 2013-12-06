@@ -45,6 +45,16 @@ But when no hiera.yaml exist in the module, the default would be:
 
 The data directory is then a standard Hiera data store.
 
+Status?
+-------
+
+This is but a first stab at turning my old pull request for ticket 16856
+into a standalone module that any > 3.0.0 Puppet user can depend on to
+get this essential feature.
+
+Some more testing is needed, sanity checking for support versions etc so
+consider this a early feedback-saught release
+
 Contact?
 --------
 
