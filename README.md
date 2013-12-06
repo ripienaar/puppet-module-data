@@ -34,7 +34,7 @@ The hiera.yaml is optional in this example it would be:
 
     ---
     :hierarchy:
-    - %{::osfamily}
+    - osfamily/%{::osfamily}
     - common
 
 But when no hiera.yaml exist in the module, the default would be:
