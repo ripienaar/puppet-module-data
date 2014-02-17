@@ -1,6 +1,18 @@
-require 'hiera'
-require 'hiera/config'
-require 'puppet/indirector/hiera'
+require "hiera"
+require "hiera/config"
+require "hiera/scope"
+
+begin
+  require 'puppet/indirector/hiera'
+rescue LoadError => e
+  $stderr.puts "Couldn't require puppet/indirector/hiera, whatever"
+end
+
+begin
+  require "puppet/indirector/code"
+rescue LoadError => e
+  $stderr.puts "Couldn't require puppet/indirector/code, whatever"
+end
 
 
 class Hiera::Config
@@ -17,7 +29,49 @@ class Hiera::Config
   end
 end
 
-class Puppet::DataBinding::Hiera < Puppet::Indirector::Hiera
+class Puppet::DataBinding::Hiera < Puppet::Indirector::Code
   desc "Retrieve data using Hiera."
-end
 
+  def initialize(*args)
+    if ! Puppet.features.hiera?
+      raise "Hiera terminus not supported without hiera library"
+    end
+    super
+  end
+
+  if defined?(::Psych::SyntaxError)
+    DataBindingExceptions = [::StandardError, ::Psych::SyntaxError]
+  else
+    DataBindingExceptions = [::StandardError]
+  end
+
+  def find(request)
+    hiera.lookup(request.key, nil, Hiera::Scope.new(request.options[:variables]), nil, nil)
+  rescue *DataBindingExceptions => detail
+    raise Puppet::DataBinding::LookupError.new(detail.message, detail)
+  end
+
+  private
+
+  def self.hiera_config
+    hiera_config = Puppet.settings[:hiera_config]
+    config = {}
+
+    if File.exist?(hiera_config)
+      config = Hiera::Config.load(hiera_config)
+    else
+      Puppet.warning "Config file #{hiera_config} not found, using Hiera defaults"
+    end
+
+    config[:logger] = 'puppet'
+    config
+  end
+
+  def self.hiera
+    @hiera ||= Hiera.new(:config => hiera_config)
+  end
+
+  def hiera
+    self.class.hiera
+  end
+end
