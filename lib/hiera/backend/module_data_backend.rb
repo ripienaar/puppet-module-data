@@ -77,9 +77,7 @@ class Hiera
 
             when :hash
               raise("Hiera type mismatch: expected Hash and got %s" % found.class) unless found.is_a?(Hash)
-              answer ||= {}
-              answer = found.merge(answer)
-
+              answer = Backend.parse_answer(found, scope).merge(answer || {})
             else
               answer = Backend.parse_answer(found, scope)
               break
