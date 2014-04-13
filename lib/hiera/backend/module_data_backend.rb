@@ -13,22 +13,22 @@ class Hiera
       def load_module_config(module_name, environment)
         default_config = {:hierarchy => ["common"]}
 
-        if mod = Puppet::Module.find(module_name, environment)
-          path = mod.path
-          module_config = File.join(path, "data", "hiera.yaml")
-          config = {}
+        mod = Puppet::Module.find(module_name, environment)
+        
+        return default_config unless mod
+        
+        path = mod.path
+        module_config = File.join(path, "data", "hiera.yaml")
+        config = {}
 
-          if File.exist?(module_config)
-            Hiera.debug("Reading config from %s file" % module_config)
-            config = load_data(module_config)
-          end
-
-          config["path"] = path
-
-          return default_config.merge(config)
-        else
-          return default_config
+        if File.exist?(module_config)
+          Hiera.debug("Reading config from %s file" % module_config)
+          config = load_data(module_config)
         end
+
+        config["path"] = path
+
+        default_config.merge(config)
       end
 
       def load_data(path)
