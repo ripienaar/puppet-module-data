@@ -14,9 +14,9 @@ class Hiera
         default_config = {:hierarchy => ["common"]}
 
         mod = Puppet::Module.find(module_name, environment)
-        
+
         return default_config unless mod
-        
+
         path = mod.path
         module_config = File.join(path, "data", "hiera.yaml")
         config = {}
@@ -49,10 +49,10 @@ class Hiera
           return answer
         end
 
-        config = load_module_config(scope["module_name"], scope["environment"])
+        config = load_module_config(scope["module_name"], scope["::environment"])
 
         unless config["path"]
-          Hiera.debug("Could not find a path to the module '%s' in environment '%s'" % [scope["module_name"], scope["environment"]])
+          Hiera.debug("Could not find a path to the module '%s' in environment '%s'" % [scope["module_name"], scope["::environment"]])
           return answer
         end
 
