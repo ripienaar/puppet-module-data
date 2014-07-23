@@ -44,7 +44,12 @@ class Hiera
 
         Hiera.debug("Looking up %s in Module Data backend" % key)
 
-        unless scope["module_name"]
+        module_name = begin
+          scope["module_name"]
+        rescue Puppet::ParseError # Gets thrown if not in a module and strict_variables = true
+        end
+
+        unless module_name
           Hiera.debug("Skipping Module Data backend as this does not look like a module")
           return answer
         end
