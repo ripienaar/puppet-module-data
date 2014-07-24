@@ -74,6 +74,8 @@ class Hiera
 
           found = data[key]
 
+          Hiera.debug("Found #{key} in #{source}")
+
           case resolution_type
             when :array
               raise("Hiera type mismatch: expected Array or String and got %s" % found.class) unless [Array, String].include?(found.class)
