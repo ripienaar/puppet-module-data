@@ -25,7 +25,8 @@ class Hiera
           Hiera.debug("Reading config from %s file" % module_config)
           config = load_data(module_config)
         end
-
+        Hiera.debug("hiera config hash is: %s" % config)
+        
         config["path"] = path
 
         default_config.merge(config)
@@ -35,6 +36,7 @@ class Hiera
         return {} unless File.exist?(path)
 
         @cache.read(path, Hash, {}) do |data|
+          Hiera.debug("YAML reading data %s" % data)
           YAML.load(data)
         end
       end
@@ -55,7 +57,9 @@ class Hiera
         end
 
         config = load_module_config(scope["module_name"], scope["::environment"])
-
+        
+        Hiera.debug("merge_behavior is set to: %s" % config[:merge_behavior])
+          
         unless config["path"]
           Hiera.debug("Could not find a path to the module '%s' in environment '%s'" % [scope["module_name"], scope["::environment"]])
           return answer
@@ -72,19 +76,18 @@ class Hiera
           next if data.empty?
           next unless data.include?(key)
 
-          found = data[key]
-
+          new_answer = Backend.parse_answer(data[key], scope)
           case resolution_type
             when :array
-              raise("Hiera type mismatch: expected Array or String and got %s" % found.class) unless [Array, String].include?(found.class)
+              raise Exception, "Hiera type mismatch: expected Array and got #{new_answer.class}" unless new_answer.kind_of? Array or new_answer.kind_of? String
               answer ||= []
-              answer << Backend.parse_answer(found, scope)
+              answer << new_answer
 
             when :hash
-              raise("Hiera type mismatch: expected Hash and got %s" % found.class) unless found.is_a?(Hash)
-              answer = Backend.parse_answer(found, scope).merge(answer || {})
+              raise Exception, "Hiera type mismatch: expected Hash and got #{new_answer.class}" unless new_answer.kind_of? Hash
+              answer = Backend.merge_answer(new_answer, answer)
             else
-              answer = Backend.parse_answer(found, scope)
+              answer = new_answer
               break
           end
         end
