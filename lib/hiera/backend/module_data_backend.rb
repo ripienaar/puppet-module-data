@@ -25,7 +25,6 @@ class Hiera
           Hiera.debug("Reading config from %s file" % module_config)
           config = load_data(module_config)
         end
-        Hiera.debug("hiera config hash is: %s" % config)
         
         config["path"] = path
 
@@ -36,7 +35,6 @@ class Hiera
         return {} unless File.exist?(path)
 
         @cache.read(path, Hash, {}) do |data|
-          Hiera.debug("YAML reading data %s" % data)
           YAML.load(data)
         end
       end
@@ -57,9 +55,6 @@ class Hiera
         end
 
         config = load_module_config(scope["module_name"], scope["::environment"])
-        
-        Hiera.debug("merge_behavior is set to: %s" % config[:merge_behavior])
-          
         unless config["path"]
           Hiera.debug("Could not find a path to the module '%s' in environment '%s'" % [scope["module_name"], scope["::environment"]])
           return answer
