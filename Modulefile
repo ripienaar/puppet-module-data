@@ -1,5 +1,5 @@
 name 'ripienaar-module_data'
-version '0.0.3'
+version '0.0.4'
 description 'A hiera backend to allow the use of data while writing sharable modules'
 project_page 'https://github.com/ripienaar/puppet-module-data'
 license 'ASL 2.0'
