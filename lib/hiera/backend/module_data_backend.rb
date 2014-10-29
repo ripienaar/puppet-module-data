@@ -80,6 +80,7 @@ class Hiera
 
             when :hash
               raise("Hiera type mismatch: expected Hash and got %s" % new_answer.class) unless new_answer.kind_of?(Hash)
+              answer ||= {}
               answer = Backend.merge_answer(new_answer, answer)
             else
               answer = new_answer
