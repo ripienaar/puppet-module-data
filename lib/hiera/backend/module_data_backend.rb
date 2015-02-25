@@ -60,6 +60,7 @@ class Hiera
           return answer
         end
 
+        config[:hierarchy].insert(0, order_override) if order_override
         config[:hierarchy].each do |source|
           source = File.join(config["path"], "data", "%s.yaml" % Backend.parse_string(source, scope))
 
