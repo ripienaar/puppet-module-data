@@ -25,7 +25,7 @@ class Hiera
           Hiera.debug("Reading config from %s file" % module_config)
           config = load_data(module_config)
         end
-        
+      
         config["path"] = path
 
         default_config.merge(config)
@@ -35,7 +35,11 @@ class Hiera
         return {} unless File.exist?(path)
 
         @cache.read(path, Hash, {}) do |data|
-          YAML.load(data)
+          if path.end_with? "/hiera.yaml"
+            YAML.load(data, deserialize_symbols: true)
+          else
+            YAML.load(data)
+          end
         end
       end
 
