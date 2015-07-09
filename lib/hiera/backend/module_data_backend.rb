@@ -13,7 +13,7 @@ class Hiera
       def load_module_config(module_name, environment)
         default_config = {:hierarchy => ["common"]}
 
-        mod = Puppet::Module.find(module_name) unless Puppet::Module.find(module_name, environment)
+        mod = Puppet::Module.find(module_name, environment) || Puppet::Module.find(module_name)
 
         return default_config unless mod
 
