@@ -36,7 +36,7 @@ class Hiera
 
         @cache.read(path, Hash, {}) do |data|
           if path.end_with? "/hiera.yaml"
-            YAML.load(data, deserialize_symbols => true)
+            YAML.load(data, :deserialize_symbols => true)
           else
             YAML.load(data)
           end
