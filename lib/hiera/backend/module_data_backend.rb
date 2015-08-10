@@ -37,8 +37,6 @@ class Hiera
         @cache.read(path, Hash, {}) do |data|
           return YAML.load(data, :deserialize_symbols => true) if path.end_with? "/hiera.yaml"
 
-          raise "Povider #{provider} not implemented!" unless ['yaml', 'json', 'hocon'].include?(provider)
-
           case provider
           when 'yaml'
             YAML.load(data)
@@ -48,6 +46,8 @@ class Hiera
           when 'json'
             require 'json'
             JSON.parse(data)
+          else
+            raise "Povider #{provider} not implemented in the Module Data backend!"
           end
         end
       end
