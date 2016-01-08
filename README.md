@@ -1,6 +1,10 @@
 What?
 =====
 
+**NOTE:** There is now native support for this feature in Puppet 4 and
+this repo is now officially deprecated and moving to unmaintained.
+See https://www.devco.net/archives/2016/01/08/native-puppet-4-data-in-modules.php
+
 While hiera does a decent job of separating code and data for users
 it is quite difficult for module authors to use hiera to create reusable
 modules. This is because the puppet backend is optional and even when
