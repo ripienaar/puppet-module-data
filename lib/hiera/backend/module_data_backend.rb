@@ -25,21 +25,39 @@ class Hiera
           Hiera.debug("Reading config from %s file" % module_config)
           config = load_data(module_config)
         end
-      
+
         config["path"] = path
 
         default_config.merge(config)
       end
 
-      def load_data(path)
+      def load_data(path, provider = 'yaml')
         return {} unless File.exist?(path)
 
         @cache.read(path, Hash, {}) do |data|
-          if path.end_with? "/hiera.yaml"
-            YAML.load(data, :deserialize_symbols => true)
-          else
+          return YAML.load(data, :deserialize_symbols => true) if path.end_with? "/hiera.yaml"
+
+          case provider
+          when 'yaml'
             YAML.load(data)
+          when 'hocon'
+            require 'hocon/config_factory'
+            Hocon::ConfigFactory.parse_string(data).resolve.root.unwrapped
+          when 'json'
+            require 'json'
+            JSON.parse(data)
+          else
+            raise "Povider #{provider} not implemented in the Module Data backend!"
           end
+        end
+      end
+
+      def file_extension(provider)
+        case provider
+        when 'hocon'
+          'conf'
+        else
+          provider
         end
       end
 
@@ -59,17 +77,20 @@ class Hiera
         end
 
         config = load_module_config(scope["module_name"], scope["::environment"])
+
         unless config["path"]
           Hiera.debug("Could not find a path to the module '%s' in environment '%s'" % [scope["module_name"], scope["::environment"]])
           return answer
         end
 
+        extension = file_extension(config[:provider])
+
         config[:hierarchy].insert(0, order_override) if order_override
         config[:hierarchy].each do |source|
-          source = File.join(config["path"], "data", "%s.yaml" % Backend.parse_string(source, scope))
+          source = File.join(config["path"], "data", "%s.#{extension}" % Backend.parse_string(source, scope))
 
           Hiera.debug("Looking for data in source %s" % source)
-          data = load_data(source)
+          data = load_data(source, config[:provider])
 
           raise("Data loaded from %s should be a hash but got %s" % [source, data.class]) unless data.is_a?(Hash)
 
@@ -82,7 +103,6 @@ class Hiera
               raise("Hiera type mismatch: expected Array and got %s" % new_answer.class) unless (new_answer.kind_of?(Array) || new_answer.kind_of?(String))
               answer ||= []
               answer << new_answer
-
             when :hash
               raise("Hiera type mismatch: expected Hash and got %s" % new_answer.class) unless new_answer.kind_of?(Hash)
               answer ||= {}
