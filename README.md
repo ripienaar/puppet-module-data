@@ -3,6 +3,10 @@ What?
 
 **NOTE:** There is now native support for this feature in Puppet 4 and
 this repo is now officially deprecated and moving to unmaintained.
+
+Additionally this module does not work on Puppet 4, will likely break your
+setup.  Do not use it on Puppet 4, migrate to native Module Data support
+
 See https://www.devco.net/archives/2016/01/08/native-puppet-4-data-in-modules.php
 
 While hiera does a decent job of separating code and data for users
