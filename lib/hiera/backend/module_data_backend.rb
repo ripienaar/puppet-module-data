@@ -5,6 +5,10 @@ class Hiera
         require 'yaml'
         require 'hiera/filecache'
 
+        if Puppet.version >= "4.0.0"
+          Puppet.warning("The ripienaar-module_data Hiera backend is not supported on Puppet 4 and will quite likely break your setup, please upgrade to the native Puppet 4 Data in Modules. See http://srt.ly/jg for more details.")
+        end
+
         Hiera.debug("Hiera Module Data backend starting")
 
         @cache = cache || Filecache.new
@@ -25,7 +29,7 @@ class Hiera
           Hiera.debug("Reading config from %s file" % module_config)
           config = load_data(module_config)
         end
-      
+
         config["path"] = path
 
         default_config.merge(config)
@@ -43,8 +47,17 @@ class Hiera
         end
       end
 
+      def no_answer
+        if Puppet.version >= "4.0.0"
+          Puppet.warning("The ripienaar-module_data Hiera backend is not supported on Puppet 4 and will quite likely break your setup, please upgrade to the native Puppet 4 Data in Modules. See http://srt.ly/jg for more details.")
+          throw :no_such_key
+        else
+          nil
+        end
+      end
+
       def lookup(key, scope, order_override, resolution_type)
-        answer = nil
+        answer = :no_such_key
 
         Hiera.debug("Looking up %s in Module Data backend" % key)
 
@@ -55,13 +68,13 @@ class Hiera
 
         unless module_name
           Hiera.debug("Skipping Module Data backend as this does not look like a module")
-          return answer
+          return no_answer
         end
 
         config = load_module_config(scope["module_name"], scope["::environment"])
         unless config["path"]
           Hiera.debug("Could not find a path to the module '%s' in environment '%s'" % [scope["module_name"], scope["::environment"]])
-          return answer
+          return no_answer
         end
 
         config[:hierarchy].insert(0, order_override) if order_override
@@ -93,7 +106,11 @@ class Hiera
           end
         end
 
-        return answer
+        if answer == :no_such_key
+          no_answer
+        else
+          nil
+        end
       end
     end
   end

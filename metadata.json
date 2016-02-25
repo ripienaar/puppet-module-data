@@ -5,6 +5,6 @@
   "project_page": "https://github.com/ripienaar/puppet-module-data",
   "source": "https://github.com/ripienaar/puppet-module-data.git",
   "summary": "A hiera backend to allow the use of data while writing sharable modules",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "dependencies": []
 }
