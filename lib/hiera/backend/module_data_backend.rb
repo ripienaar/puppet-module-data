@@ -109,7 +109,7 @@ class Hiera
         if answer == :no_such_key
           no_answer
         else
-          nil
+          answer
         end
       end
     end
